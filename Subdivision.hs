@@ -20,7 +20,7 @@ data Scheme = Scheme { arity :: Int, mask  :: [Double] }
 -- | Cubic B-spline: @[1,4,6,4,1]/8@
 cubicBSpline            = Scheme 2 [1,4,6,4,1]
 -- | Quadratic B-spline: @[1,3,3,1]/4@
-quadraticBSline         = Scheme 2 [1,3,3,1]
+quadraticBSpline         = Scheme 2 [1,3,3,1]
 -- | Ternary Quadratic B-spline: @[1,3,6,7,6,3,1]/9@
 ternaryQuadraticBSpline = Scheme 3 [1,3,6,7,6,3,1]
 -- | Ternary neither: @[1,3,5,5,3,1]/6@
@@ -30,7 +30,7 @@ fourPoint               = Scheme 2 [-1,0,9,16,9,0,-1]
 
 -- | A list of the above schemes, for convenience.
 schemes = [ cubicBSpline
-          , quadraticBSline
+          , quadraticBSpline
           , ternaryQuadraticBSpline
           , ternaryNeither
           , fourPoint
@@ -79,7 +79,8 @@ support (Scheme a xs) = fromIntegral (length xs - 1) / fromIntegral (a - 1)
 -- where the basis function has considerable impact.
 -- The result is a list of three values corresponding to the tolerances 1%, 2%, and 5%:
 --
--- >practicalSupports 3 cubicBSpline == [3.21484375,3.01171875,2.66015625]
+-- >>> practicalSupports 3 cubicBSpline
+-- [3.21484375,3.01171875,2.66015625]
 --
 -- It uses @n@ squaring operations to generate a good approximation of the basis function.
 practicalSupports :: Int -> Scheme -> [Double]
@@ -101,3 +102,23 @@ norm :: Int -> Scheme -> Double
 norm n = maxRow . rows . (!! n) . iterate square
     where rows s = transpose . chunksOf (arity s) . dividedMask $ s
           maxRow = maximum . map (sum . map abs)
+
+-- ** Section 14: Continuity 1 - at Support Ends
+
+-- | Returns the Holder-continuity at the ends of the basis function.
+-- This is only an upper bound on the continuity of the limit curve.
+--
+-- >>> continuity cubicBSpline
+-- (2,1.0)
+--
+-- Example schemes with lower true continuity:
+--
+-- >>> continuity (Scheme 2 [1,8,14,8,1])
+-- (3,1.0)
+-- >>> continuity (Scheme 2 [2,7,10,7,2])
+-- (2,0.8073549220576046)
+continuity :: Scheme -> (Int, Double)
+continuity s@(Scheme a xs) = let d = ceiling k - 1
+                             in (d, k - fromIntegral d)
+    where k  = negate $ log y0 / log (fromIntegral a)
+          y0 = abs (head xs) / divisor s

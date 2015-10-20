@@ -1,6 +1,8 @@
 syntax: glob
 
-doc/*
 *~
 .\#*
 *\#
+.cabal-sandbox*
+cabal.sandbox.config
+dist/*
