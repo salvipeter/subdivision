@@ -7,6 +7,8 @@ module Subdivision where
 
 import Data.List (tails, transpose)
 import Data.List.Split (chunksOf)
+import qualified Data.Packed.Matrix as M
+import Numeric.LinearAlgebra.Algorithms (eig)
 
 -- * Part II. Dramatis Personae
 -- ** Section 11: An introduction to some regularly-appearing characters
@@ -122,3 +124,11 @@ continuity s@(Scheme a xs) = let d = ceiling k - 1
                              in (d, k - fromIntegral d)
     where k  = negate $ log y0 / log (fromIntegral a)
           y0 = abs (head xs) / divisor s
+
+-- ** Section 15: Continuity 2 - Eigenanalysis
+
+-- | Returns the core parts of the subdivision matrix around mark points.
+-- Then 'eig' can be used to compute the eigenvalues and eigenvectors.
+-- matrices :: Scheme -> [Matrix Double]
+-- matrices (Scheme a xs) = [matrix i | i <- [0..a-2]]
+--     where matrix i = 

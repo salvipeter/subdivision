@@ -17,4 +17,4 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Subdivision
   -- other-modules:       
-  build-depends:       base ==4.6.*, split ==0.2.*
+  build-depends:       base ==4.6.*, split ==0.2.*, hmatrix ==0.16.*
