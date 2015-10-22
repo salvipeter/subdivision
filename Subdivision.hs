@@ -7,6 +7,7 @@ module Subdivision where
 
 import Data.List (tails, transpose)
 import Data.List.Split (chunksOf)
+import Data.Packed.Matrix (Matrix)
 import qualified Data.Packed.Matrix as M
 import Numeric.LinearAlgebra.Algorithms (eig)
 
@@ -110,18 +111,18 @@ norm n = maxRow . rows . (!! n) . iterate square
 -- | Returns the Holder-continuity at the ends of the basis function.
 -- This is only an upper bound on the continuity of the limit curve.
 --
--- >>> continuity cubicBSpline
+-- >>> endContinuity cubicBSpline
 -- (2,1.0)
 --
 -- Example schemes with lower true continuity:
 --
--- >>> continuity (Scheme 2 [1,8,14,8,1])
+-- >>> endContinuity (Scheme 2 [1,8,14,8,1])
 -- (3,1.0)
--- >>> continuity (Scheme 2 [2,7,10,7,2])
+-- >>> endContinuity (Scheme 2 [2,7,10,7,2])
 -- (2,0.8073549220576046)
-continuity :: Scheme -> (Int, Double)
-continuity s@(Scheme a xs) = let d = ceiling k - 1
-                             in (d, k - fromIntegral d)
+endContinuity :: Scheme -> (Int, Double)
+endContinuity s@(Scheme a xs) = let d = ceiling k - 1
+                                in (d, k - fromIntegral d)
     where k  = negate $ log y0 / log (fromIntegral a)
           y0 = abs (head xs) / divisor s
 
@@ -129,6 +130,28 @@ continuity s@(Scheme a xs) = let d = ceiling k - 1
 
 -- | Returns the core parts of the subdivision matrix around mark points.
 -- Then 'eig' can be used to compute the eigenvalues and eigenvectors.
--- matrices :: Scheme -> [Matrix Double]
--- matrices (Scheme a xs) = [matrix i | i <- [0..a-2]]
---     where matrix i = 
+matrices :: Scheme -> [Matrix Double]
+matrices (Scheme a xs) = [matrix i | i <- [0..a-2]]
+    where matrix i = undefined
+
+-- ** Section 16: Continuity 3 - Difference Schemes
+
+-- | Returns a lower bound for the number of continuous derivatives.
+continuityLowerBound :: Scheme -> Int
+continuityLowerBound = undefined
+
+-- ** Section 17: Continuity 4 - Difference Eigenanalysis
+
+-- | The kernel is represented as a list of doubles.
+type Kernel = [Double]
+
+-- | Returns the kernel of a subdivision scheme.
+kernel :: Scheme -> Kernel
+kernel = undefined
+
+-- | Returns an upper bound for the Holder-continuity of the limit curve, based on the kernel.
+continuityUpperBound :: Kernel -> (Int, Double)
+continuityUpperBound = undefined
+
+-- eigenRows :: Scheme -> Matrix Double
+
