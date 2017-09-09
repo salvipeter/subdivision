@@ -1,3 +1,5 @@
+module Subdivision
+
 # Part II. Dramatis Personae
 
 # Section 11: An introduction to some regularly-appearing characters
@@ -7,9 +9,9 @@ A subdivision scheme is defined by its mask and its arity.
 The mask can be given in integers, as in `Scheme(2, [1,3,3,1])`.
 A suitable divisor for normalizing is computed by `divisor`.
 """
-type Scheme
+struct Scheme
     arity :: Int
-    mask :: Array{Float64,1}
+    mask  :: Array{Float64,1}
 end
 
 cubic_bspline = Scheme(2, [1,4,6,4,1])
@@ -58,7 +60,7 @@ This results in a more dense scheme with the same support.
 Iterated use of this function gives a good approximation of the basis function.
 With an additional argument `n` it squares the scheme `n` times.
 """
-square(s, n=1) = n < 1 ? s : square(Scheme(s.arity^2, subdivide(s, s.mask, false)), n-1)
+square(s, n=1) = n < 1 ? s : square(Scheme(s.arity^2, subdivide(s, s.mask, dividep=false)), n-1)
 
 "Returns the support of the scheme. Note that it may not be integral."
 support(s) = (length(s.mask) - 1) / (s.arity - 1)
@@ -67,12 +69,15 @@ support(s) = (length(s.mask) - 1) / (s.arity - 1)
 `practical_supports(s, n)` approximates the support of scheme `s`,
 where the basis function has considerable impact.
 The result is a list of three values corresponding to the tolerances 1%, 2%, and 5%.
-It uses `n` squaring operations to generate a good approximation of the basis function.
+It uses `n` squaring operations to generate a good approximation of the basis function,
+and assumes that the scheme is symmetric.
 """
 function practical_supports(s, n)
     tolerances = [0.01, 0.02, 0.05]
     s2 = square(s, n)
-    [length(filter(x -> x > tol, dividedmask(s2))) for tol in tolerances] / s2.arity
+    mask = dividedmask(s2)
+    small = [findfirst(x -> abs(x) > tol, mask) for tol in tolerances] - 1
+    (length(mask) - small * 2 - 1) / s2.arity
 end
 
 # Section 13: Enclosure
@@ -115,10 +120,11 @@ continuity_lowerbound(s) = error("TODO")
 
 # Section 17: Continuity 4 - Difference Eigenanalysis
 
-typealias Kernel Array{Float64,1}
+const Kernel = Array{Float64,1}
 
 kernel(s) = error("TODO")
 
 "Returns an upper bound for the Holder-continuity of the limit curve, based on the kernel."
 continuity_upperbound(s) = error("TODO")
 
+end
